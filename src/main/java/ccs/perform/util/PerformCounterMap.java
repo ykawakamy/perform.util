@@ -24,9 +24,7 @@ public class PerformCounterMap {
         PerformSnapshot snap = new PerformSnapshot();
         for( var it : pcMap.values() ) {
             var p = it.reset();
-            snap.err += p.err;
-            snap.perform += p.perform;
-            snap.latency += p.latency;
+            snap.add(p);
         }
 
         return snap;

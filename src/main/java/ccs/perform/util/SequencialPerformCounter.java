@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class SequencialPerformCounter {
     private AtomicInteger seq = new AtomicInteger();
+    private AtomicInteger noupdate = new AtomicInteger();
     private AtomicInteger skipError = new AtomicInteger();
     private AtomicInteger rewindError = new AtomicInteger();
     private AtomicInteger perform = new AtomicInteger();
@@ -20,15 +21,21 @@ public class SequencialPerformCounter {
     public int getSeq() {
         return seq.get();
     }
-
+    
+    /** use {@link PerformSnapshot#getErr()} instead. */
+    @Deprecated
     public int getErr() {
         return rewindError.get();
     }
 
+    /** use {@link PerformSnapshot#getPerform()} instead. */
+    @Deprecated
     public int getPerform() {
         return perform.get();
     }
 
+    /** use {@link SequencialPerformCounter#reset()} instead. */
+    @Deprecated
     public int retrievePerform() {
         int v = perform.getAndSet(0);
         rewindError.set(0);
@@ -37,15 +44,25 @@ public class SequencialPerformCounter {
 
     public void perform(int actual) {
         AtomicBoolean isOk = new AtomicBoolean(false);
-        int expected = seq.getAndUpdate( (p)->{ boolean is = actual == p;
-            isOk.set(is);
-            return is ? actual+1 : actual+1;
+        AtomicBoolean isNoUpdate = new AtomicBoolean(false);
+        int nextExpected = seq.getAndUpdate( (expected)->{ 
+        	isOk.set(actual == expected);
+        	isNoUpdate.set(actual == expected-1);
+            return actual+1;
         });
-        actualMin.getAndAccumulate(actual, Math::min);
-        if( actual < expected-1 ) {
-            rewindError.getAndIncrement();
+        if( !isOk.get() ) {
+        	if( isNoUpdate.get() ) {
+        		noupdate.getAndIncrement();
+        	}else if( actual < nextExpected-1 ) {
+	            rewindError.getAndIncrement();
+	        }else {
+	        	skipError.getAndIncrement();
+	        }
         }
         perform.getAndIncrement();
+
+        actualMin.getAndAccumulate(actual, Math::min);
+        actualMax.getAndAccumulate(actual, Math::max);
     }
 
     public void addLatency(long n) {
@@ -54,7 +71,11 @@ public class SequencialPerformCounter {
 
     public PerformSnapshot reset() {
         PerformSnapshot snap = new PerformSnapshot();
-        snap.err = rewindError.getAndSet(0);
+        snap.noupdate = noupdate.getAndSet(0);
+        snap.rewindError = rewindError.getAndSet(0);
+        snap.skipError = skipError.getAndSet(0);
+        snap.actualMin = actualMin.getAndSet(Integer.MAX_VALUE);
+        snap.actualMax = actualMax.getAndSet(Integer.MIN_VALUE);
         snap.perform = perform.getAndSet(0);
         snap.latency = latency.getAndSet(0);
         return snap;
