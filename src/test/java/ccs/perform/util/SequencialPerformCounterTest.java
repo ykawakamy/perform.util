@@ -58,11 +58,8 @@ class SequencialPerformCounterTest {
         SequencialPerformCounter pc = new SequencialPerformCounter();
 
         pc.perform(2);
-        Assertions.assertEquals(0, pc.getErr());
         pc.perform(1);
-        Assertions.assertEquals(1, pc.getErr());
         pc.perform(0);
-        Assertions.assertEquals(2, pc.getErr());
 
         PerformSnapshot snapshot = pc.reset();
         Assertions.assertEquals(1, pc.getSeq());
@@ -77,13 +74,10 @@ class SequencialPerformCounterTest {
         SequencialPerformCounter pc = new SequencialPerformCounter();
 
         pc.perform(2);
-        Assertions.assertEquals(0, pc.getErr());
         pc.perform(2);
-        Assertions.assertEquals(0, pc.getErr());
         pc.perform(0);
-        Assertions.assertEquals(1, pc.getErr());
-        PerformSnapshot snapshot = pc.reset();
 
+        PerformSnapshot snapshot = pc.reset();
         Assertions.assertEquals(1, pc.getSeq());
         Assertions.assertEquals(3, snapshot.getErr());
         Assertions.assertEquals(1, snapshot.noupdate);
@@ -98,13 +92,10 @@ class SequencialPerformCounterTest {
         SequencialPerformCounter pc = new SequencialPerformCounter();
 
         pc.perform(2);
-        Assertions.assertEquals(0, pc.getErr());
         pc.perform(0);
-        Assertions.assertEquals(1, pc.getErr());
         pc.perform(1);
-        Assertions.assertEquals(1, pc.getErr());
-        PerformSnapshot snapshot = pc.reset();
 
+        PerformSnapshot snapshot = pc.reset();
         Assertions.assertEquals(2, pc.getSeq());
         Assertions.assertEquals(2, snapshot.getErr());
         Assertions.assertEquals(0, snapshot.noupdate);
@@ -118,13 +109,10 @@ class SequencialPerformCounterTest {
         SequencialPerformCounter pc = new SequencialPerformCounter();
 
         pc.perform(2);
-        Assertions.assertEquals(0, pc.getErr());
         pc.perform(0);
-        Assertions.assertEquals(1, pc.getErr());
         pc.perform(2);
-        Assertions.assertEquals(1, pc.getErr());
-        PerformSnapshot snapshot = pc.reset();
 
+        PerformSnapshot snapshot = pc.reset();
         Assertions.assertEquals(3, pc.getSeq());
         Assertions.assertEquals(3, snapshot.getErr());
         Assertions.assertEquals(0, snapshot.noupdate);

@@ -22,26 +22,6 @@ public class SequencialPerformCounter {
         return seq.get();
     }
     
-    /** use {@link PerformSnapshot#getErr()} instead. */
-    @Deprecated
-    public int getErr() {
-        return rewindError.get();
-    }
-
-    /** use {@link PerformSnapshot#getPerform()} instead. */
-    @Deprecated
-    public int getPerform() {
-        return perform.get();
-    }
-
-    /** use {@link SequencialPerformCounter#reset()} instead. */
-    @Deprecated
-    public int retrievePerform() {
-        int v = perform.getAndSet(0);
-        rewindError.set(0);
-        return v;
-    }
-
     public void perform(int actual) {
         AtomicBoolean isOk = new AtomicBoolean(false);
         AtomicBoolean isNoUpdate = new AtomicBoolean(false);
