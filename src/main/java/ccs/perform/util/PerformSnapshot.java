@@ -35,22 +35,28 @@ public class PerformSnapshot {
 
     }
 
+    public float getOperationPerSec(long elapsedTimeNs ) {
+        return (float)getPerform() * 1_000_000_000 / elapsedTimeNs;
+
+    }
+
+
     public float getLatencyPerOperation() {
         return (float)getLatency()/getPerform();
     }
 
     public void print(Logger log, long elapsedNanoSec) {
-		log.info("range: {} - {} elapsed: {} ns. process: {} op. {} ns/op. ( {} op/ms ) latency: {} ms/op"
-				+ " | errors - total: {} ( noupdate: {} rewind: {} skip: {} )", 
-				actualMin, 
+		log.info("range: {} - {} elapsed: {} ns. process: {} op. {} ns/op. ( {} op/s ) latency: {} ms/op"
+				+ " | errors - total: {} ( noupdate: {} rewind: {} skip: {} )",
+				actualMin,
 				actualMax,
-				elapsedNanoSec, 
-				this.getPerform(), 
+				elapsedNanoSec,
+				this.getPerform(),
 				this.getElapsedPerOperation(elapsedNanoSec),
-				this.getOperationPerMillis(elapsedNanoSec),
+				this.getOperationPerSec(elapsedNanoSec),
 				this.getLatencyPerOperation(),
-				//-- 
-				this.getErr(), 
+				//--
+				this.getErr(),
 				this.noupdate,
 				this.rewindError,
 				this.skipError
@@ -64,7 +70,7 @@ public class PerformSnapshot {
         this.rewindError += p.rewindError;
         this.skipError += p.skipError;
 
-        this.actualMin = Math.max(this.actualMin, p.actualMin);
+        this.actualMin = Math.min(this.actualMin, p.actualMin);
         this.actualMax =  Math.max(this.actualMax, p.actualMax);
 	}
 }
